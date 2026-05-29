@@ -44,3 +44,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Send visit data to a Google Apps Script endpoint for private tracking
+const VISIT_WEBHOOK_URL ='https://script.google.com/macros/s/AKfycbw7IV5yxaZLOj_vONoZ7pIDas_uPmizbZfXsWjLSjf8HmrGdDZ25yKRzzliQNNgwlTk/exec'; // paste your Apps Script web app URL here
+
+function reportVisitToSheet() {
+  if (!VISIT_WEBHOOK_URL) return;
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    page: window.location.pathname,
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+    language: navigator.language || navigator.userLanguage,
+    referrer: document.referrer || null,
+  };
+
+  fetch(VISIT_WEBHOOK_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  }).catch(() => {
+    // fail silently; no public output required
+  });
+}
+
+// Run on DOM ready
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(reportVisitToSheet, 800);
+} else {
+  document.addEventListener('DOMContentLoaded', reportVisitToSheet);
+}

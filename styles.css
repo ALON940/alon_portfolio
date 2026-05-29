@@ -205,6 +205,12 @@ a {
   color: var(--muted);
 }
 
+.visit-summary {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 .contact-form {
   display: grid;
   gap: 16px;
