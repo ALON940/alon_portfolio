@@ -48,25 +48,36 @@ document.addEventListener('DOMContentLoaded', () => {
 // Send visit data to a Google Apps Script endpoint for private tracking
 const VISIT_WEBHOOK_URL ='https://script.google.com/macros/s/AKfycbw7IV5yxaZLOj_vONoZ7pIDas_uPmizbZfXsWjLSjf8HmrGdDZ25yKRzzliQNNgwlTk/exec'; // paste your Apps Script web app URL here
 
-function reportVisitToSheet() {
+async function reportVisitToSheet() {
+
   if (!VISIT_WEBHOOK_URL) return;
 
-  const payload = {
-    timestamp: new Date().toISOString(),
-    page: window.location.pathname,
-    url: window.location.href,
-    userAgent: navigator.userAgent,
-    language: navigator.language || navigator.userLanguage,
-    referrer: document.referrer || null,
-  };
+  try {
 
-  fetch(VISIT_WEBHOOK_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify(payload),
-  }).catch(() => {
-  // fail silently; no public output required
-  });
+    const ipData = await fetch('https://ipapi.co/json/')
+      .then(response => response.json());
+
+    const payload = {
+      timestamp: new Date().toISOString(),
+      ip: ipData.ip || '',
+      country: ipData.country_name || '',
+      city: ipData.city || '',
+      page: window.location.pathname,
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      language: navigator.language || navigator.userLanguage,
+      referrer: document.referrer || null,
+    };
+
+    fetch(VISIT_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+
+  } catch (error) {
+    console.error('Tracking error:', error);
+  }
 }
 
 // Run on DOM ready
